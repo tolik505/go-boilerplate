@@ -1,0 +1,5 @@
+- uuid: uuid-1
+  content: Post 1
+- uuid: uuid-2
+  content: Post 2
+  metadata: {"title": "test"}

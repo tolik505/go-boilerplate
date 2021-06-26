@@ -1,0 +1,49 @@
+version: '3.3'
+
+services:
+  httpserver:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    env_file:
+      - env/build.env
+    environment:
+      - WAIT_HOSTS=goboilerplate-mysql:3306
+      - WAIT_SLEEP_INTERVAL=1
+    command: sh -c "/wait && /httpserver"
+    volumes:
+      - ./bin/httpserver:/httpserver
+    ports:
+      - 8080:8080
+
+  grpcserver:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    env_file:
+      - env/build.env
+    environment:
+      - WAIT_HOSTS=goboilerplate-mysql:3306
+      - WAIT_SLEEP_INTERVAL=1
+    command: sh -c "/wait && /grpcserver"
+    volumes:
+      - ./bin/grpcserver:/grpcserver
+    ports:
+      - 5555:5555
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "mysql://root:password@tcp(mysql:3306)/goboilerplate", "up"]
+
+  mysql:
+    image: mysql:5.7
+    container_name: goboilerplate-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=goboilerplate
+    volumes:
+      - .mysqldb:/var/lib/mysql:rw
+    ports:
+      - 3306:3306

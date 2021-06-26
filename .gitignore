@@ -1,0 +1,5 @@
+.idea
+.DS_Store
+bin/*
+.mysqldb
+env/local.env

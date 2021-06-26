@@ -1,0 +1,28 @@
+type Post {
+    uuid: ID!
+    content: String!
+    metadata: String
+}
+
+# ------ QUERY ------
+type Query {
+    posts: [Post!]!
+    post(uuid: ID!): Post
+}
+
+input CreatePostInput {
+    content: String!
+    metadata: String
+}
+
+input UpdatePostInput {
+    content: String!
+    metadata: String
+}
+
+# ------ MUTATION ------
+type Mutation {
+    createPost(data: CreatePostInput!): ID!
+    updatePost(uuid: ID!, data: UpdatePostInput!): Boolean!
+    deletePost(uuid: ID!): Boolean!
+}

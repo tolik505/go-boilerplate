@@ -1,0 +1,18 @@
+syntax = "proto3";
+package goboilerplate;
+option go_package = "pb";
+
+message Post {
+    string uuid = 1;
+    string content = 2;
+}
+
+message GetAllPostsRequest {}
+
+message GetAllPostsResponse {
+    repeated Post posts = 1;
+}
+
+service PostsService {
+    rpc GetAllPosts(GetAllPostsRequest) returns (GetAllPostsResponse) {};
+}

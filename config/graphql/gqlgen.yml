@@ -1,0 +1,32 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+- schema.graphql
+exec:
+  filename: ../../pkg/httpapp/gql/generated/generated.go
+  package: generated
+
+model:
+  filename: ../../pkg/model/models_gen.go
+  package: model
+
+resolver:
+  layout: follow-schema
+  dir: ../../pkg/httpapp/gql
+  package: gql
+  filename_template: "{name}.resolvers.go"
+  type: Resolver
+
+autobind:
+  - goboilerplate/pkg/model
+
+omit_slice_element_pointers: true
+
+models:
+  Post:
+    fields:
+      metadata:
+        fieldName: MetadataString

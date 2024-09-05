@@ -6,6 +6,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"goboilerplate/pkg/apperr"
+	"goboilerplate/pkg/httpapp/gql/generated"
+	"io"
+	"net/http"
+	"os"
+	"os/signal"
+	"runtime/debug"
+	"syscall"
+	"time"
+
 	"github.com/99designs/gqlgen/graphql"
 	gqlHandler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -17,15 +27,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"goboilerplate/pkg/apperr"
-	"goboilerplate/pkg/httpapp/gql/generated"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"os/signal"
-	"runtime/debug"
-	"syscall"
-	"time"
 )
 
 const InternalServerErrorCode = "INTERNAL_SERVER_ERROR"
@@ -50,7 +51,13 @@ func Initialize(
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowCredentials: true,
 		AllowHeaders:     []string{echo.HeaderContentType, echo.HeaderAuthorization},
-		AllowMethods:     []string{http.MethodGet, http.MethodPatch, http.MethodPost, http.MethodDelete, http.MethodOptions},
+		AllowMethods: []string{
+			http.MethodGet,
+			http.MethodPatch,
+			http.MethodPost,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
 	}))
 	e.HTTPErrorHandler = customHTTPErrorHandler
 	gqlServer := gqlHandler.New(
@@ -102,9 +109,9 @@ func Initialize(
 	e.POST("/graphql", func(c echo.Context) error {
 		// Create newrelic transaction segment
 		var params *graphql.RawParams
-		buf, _ := ioutil.ReadAll(c.Request().Body)
-		rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
-		rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
+		buf, _ := io.ReadAll(c.Request().Body)
+		rdr1 := io.NopCloser(bytes.NewBuffer(buf))
+		rdr2 := io.NopCloser(bytes.NewBuffer(buf))
 		dec := json.NewDecoder(rdr1)
 		if err := dec.Decode(&params); err == nil {
 			tx := newrelic.FromContext(c.Request().Context())
@@ -133,12 +140,13 @@ func Initialize(
 
 // Run starts http Server
 func (a *App) Run() {
-	if err := a.Server.Start(fmt.Sprintf(":%v", a.Port)); err != nil && err != http.ErrServerClosed {
+	if err := a.Server.Start(fmt.Sprintf(":%v", a.Port)); err != nil &&
+		err != http.ErrServerClosed {
 		a.Server.Logger.Fatal("shutting down the server")
 	}
 }
 
-//WaitForInterrupt waits for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
+// WaitForInterrupt waits for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
 func (a *App) WaitForInterrupt() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

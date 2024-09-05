@@ -2,7 +2,7 @@ NAME = goboilerplate
 #
 #Variables for mysql integration tests
 #
-MYSQL_IMAGE = mysql:5.7
+MYSQL_IMAGE = mysql:8.0
 MYSQL_CONTAINER_NAME = $(NAME)-mysql-test
 MYSQL_PORT = 3369
 MYSQL_HOST = localhost
